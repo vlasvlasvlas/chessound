@@ -502,11 +502,17 @@ class ChesSoundApp {
       document.getElementById(`vol-${layer}`)?.addEventListener('input', e => {
         this.soundEngine.setLayerVolume(layer, parseFloat(e.target.value));
       });
-      document.getElementById(`mute-${layer}`)?.addEventListener('click', function() {
-        const muted = this.classList.toggle('muted');
-        app.soundEngine.setLayerMute(layer, muted);
-        if (layer === 'pawnseq') app.pawnSequencer.isMuted = muted;
-      });
+      const muteBtn = document.getElementById(`mute-${layer}`);
+      if (muteBtn) {
+        if (muteBtn.classList.contains('muted')) {
+          this.soundEngine.setLayerMute(layer, true);
+        }
+        muteBtn.addEventListener('click', function() {
+          const muted = this.classList.toggle('muted');
+          app.soundEngine.setLayerMute(layer, muted);
+          if (layer === 'pawnseq') app.pawnSequencer.isMuted = muted;
+        });
+      }
     });
 
     PIECES.forEach(piece => {
