@@ -149,102 +149,39 @@ export class ChessEngine {
     return this._formatMoveInfo(move, this.currentMoveIndex);
   }
 
-  _evaluateBoard(chess) {
-    let totalEvaluation = 0;
-    const board = chess.board();
-    const values = { p: 10, n: 30, b: 30, r: 50, q: 90, k: 900 };
-    const center = [
-      [0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0],
-      [0,0,1,1,1,1,0,0],
-      [0,0,1,2,2,1,0,0],
-      [0,0,1,2,2,1,0,0],
-      [0,0,1,1,1,1,0,0],
-      [0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0]
-    ];
-    
-    for (let i = 0; i < 8; i++) {
-      for (let j = 0; j < 8; j++) {
-        const piece = board[i][j];
-        if (piece) {
-          let val = (values[piece.type] || 0) + center[i][j];
-          totalEvaluation += (piece.color === 'w' ? val : -val);
-        }
-      }
-    }
-    return totalEvaluation;
-  }
-
-  _minimax(chess, depth, alpha, beta, isMaximizing) {
-    if (depth === 0) {
-      return this._evaluateBoard(chess);
-    }
-    
-    const moves = chess.moves();
-    
-    // Quick game over check without heavy methods
-    if (moves.length === 0) {
-      if (chess.in_check()) return isMaximizing ? -9999 : 9999;
-      return 0; // Draw/Stalemate
-    }
-
-    if (isMaximizing) {
-      let maxEval = -Infinity;
-      for (let i = 0; i < moves.length; i++) {
-        chess.move(moves[i]);
-        maxEval = Math.max(maxEval, this._minimax(chess, depth - 1, alpha, beta, false));
-        chess.undo();
-        alpha = Math.max(alpha, maxEval);
-        if (beta <= alpha) break;
-      }
-      return maxEval;
-    } else {
-      let minEval = Infinity;
-      for (let i = 0; i < moves.length; i++) {
-        chess.move(moves[i]);
-        minEval = Math.min(minEval, this._minimax(chess, depth - 1, alpha, beta, true));
-        chess.undo();
-        beta = Math.min(beta, minEval);
-        if (beta <= alpha) break;
-      }
-      return minEval;
-    }
-  }
-
   generateBotMove() {
     if (this.chess.game_over()) return null;
     const moves = this.chess.moves({ verbose: true });
     if (moves.length === 0) return null;
 
+    const pieceValues = { p: 10, n: 30, b: 30, r: 50, q: 90, k: 900 };
     let bestMove = null;
-    const isMaximizing = this.chess.turn() === 'w';
-    let bestValue = isMaximizing ? -Infinity : Infinity;
+    let bestScore = -Infinity;
 
-    // Shuffle moves to ensure varied games (not the exact same game every time)
-    moves.sort(() => Math.random() - 0.5);
-
-    // Depth 2 search (root loop + 1 depth in minimax)
     for (let i = 0; i < moves.length; i++) {
       const move = moves[i];
-      this.chess.move(move.san);
-      const boardValue = this._minimax(this.chess, 1, -Infinity, Infinity, !isMaximizing);
-      this.chess.undo();
+      let score = 0;
+      
+      // Premiar fuertemente las capturas
+      if (move.captured) {
+        score += pieceValues[move.captured] || 0;
+      }
+      
+      // Premiar las promociones
+      if (move.flags.includes('p')) {
+        score += 80;
+      }
 
-      if (isMaximizing) {
-        if (boardValue > bestValue) {
-          bestValue = boardValue;
-          bestMove = move;
-        }
-      } else {
-        if (boardValue < bestValue) {
-          bestValue = boardValue;
-          bestMove = move;
-        }
+      // Añadir factor aleatorio para que las partidas siempre sean distintas
+      score += Math.random() * 15;
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestMove = move;
       }
     }
 
-    if (!bestMove) bestMove = moves[0];
+    if (!bestMove) bestMove = moves[Math.floor(Math.random() * moves.length)];
     
     const moveResult = this.chess.move(bestMove.san);
     this.moves = this.moves.slice(0, this.currentMoveIndex);
