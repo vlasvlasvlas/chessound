@@ -487,6 +487,10 @@ class ChesSoundApp {
       if (bpmValue) bpmValue.textContent = this.bpm;
     });
 
+    document.getElementById('fx-reverb')?.addEventListener('input', e => {
+      this.soundEngine.setAmbience(e.target.value);
+    });
+
     LAYERS.forEach(layer => {
       document.getElementById(`vol-${layer}`)?.addEventListener('input', e => {
         this.soundEngine.setLayerVolume(layer, parseFloat(e.target.value));
