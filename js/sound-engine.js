@@ -144,6 +144,11 @@ export class SoundEngine {
           modulationEnvelope: { attack: 0.04, decay: 0.22, sustain: 0.08, release: 0.9 }
         });
       case 'poly':
+        return new Tone.PolySynth(Tone.Synth, {
+          oscillator: { type: 'triangle8' },
+          envelope: { attack: 0.035, decay: 0.28, sustain: 0.28, release: 1.55 }
+        });
+      case 'poly-analog':
         // CS-80 style Brass / Pad
         return new Tone.PolySynth(Tone.MonoSynth, {
           oscillator: { type: 'fatsawtooth', count: 3, spread: 25 },
@@ -152,6 +157,13 @@ export class SoundEngine {
           filterEnvelope: { attack: 0.05, decay: 0.4, sustain: 0.4, release: 1.5, baseFrequency: 300, octaves: 2.5 }
         });
       case 'mono':
+        return new Tone.MonoSynth({
+          oscillator: { type: 'square4' },
+          envelope: { attack: 0.012, decay: 0.28, sustain: 0.16, release: 0.65 },
+          filter: { Q: 1.2, type: 'lowpass', rolloff: -24 },
+          filterEnvelope: { attack: 0.025, decay: 0.22, sustain: 0.12, release: 0.5, baseFrequency: 110, octaves: 2.6 }
+        });
+      case 'mono-analog':
         // Fat Moog style Bass
         return new Tone.MonoSynth({
           oscillator: { type: 'fatsquare', count: 2, spread: 15 },
@@ -176,12 +188,17 @@ export class SoundEngine {
           oscillator: { type: 'sine' },
           envelope: { attack: 0.002, decay: 0.12, sustain: 0, release: 0.09 }
         });
-      case 'synth':
-      default:
+      case 'synth-analog':
         // Classic Analog Lead
         return new Tone.Synth({
           oscillator: { type: 'fatsawtooth', count: 2, spread: 10 },
           envelope: { attack: 0.015, decay: 0.2, sustain: 0.3, release: 1.2 }
+        });
+      case 'synth':
+      default:
+        return new Tone.Synth({
+          oscillator: { type: 'triangle' },
+          envelope: { attack: 0.025, decay: 0.2, sustain: 0.22, release: 1 }
         });
     }
   }
