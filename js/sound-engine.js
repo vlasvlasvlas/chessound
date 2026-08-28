@@ -106,13 +106,13 @@ export class SoundEngine {
     }).connect(this.fxBus);
 
     this.finalSynth = new Tone.PolySynth(Tone.Synth, {
-      oscillator: { type: 'triangle8' },
-      envelope: { attack: 0.04, decay: 0.4, sustain: 0.45, release: 2.8 }
+      oscillator: { type: 'fatsawtooth', count: 3, spread: 20 },
+      envelope: { attack: 0.1, decay: 0.4, sustain: 0.45, release: 2.8 }
     }).connect(this.fxBus);
 
     this.droneSynth = new Tone.PolySynth(Tone.Synth, {
-      oscillator: { type: 'sine' },
-      envelope: { attack: 1.6, decay: 0.2, sustain: 0.82, release: 2.8 }
+      oscillator: { type: 'fatsawtooth', count: 4, spread: 35 },
+      envelope: { attack: 2.5, decay: 0.5, sustain: 0.82, release: 4 }
     }).connect(this.droneFilter);
 
     for (const piece of Object.keys(DEFAULT_SYNTHS)) {
@@ -144,16 +144,20 @@ export class SoundEngine {
           modulationEnvelope: { attack: 0.04, decay: 0.22, sustain: 0.08, release: 0.9 }
         });
       case 'poly':
-        return new Tone.PolySynth(Tone.Synth, {
-          oscillator: { type: 'triangle8' },
-          envelope: { attack: 0.035, decay: 0.28, sustain: 0.28, release: 1.55 }
+        // CS-80 style Brass / Pad
+        return new Tone.PolySynth(Tone.MonoSynth, {
+          oscillator: { type: 'fatsawtooth', count: 3, spread: 25 },
+          envelope: { attack: 0.15, decay: 0.3, sustain: 0.6, release: 1.8 },
+          filter: { Q: 1.2, type: 'lowpass', rolloff: -12 },
+          filterEnvelope: { attack: 0.15, decay: 0.4, sustain: 0.4, release: 1.5, baseFrequency: 300, octaves: 2.5 }
         });
       case 'mono':
+        // Fat Moog style Bass
         return new Tone.MonoSynth({
-          oscillator: { type: 'square4' },
-          envelope: { attack: 0.012, decay: 0.28, sustain: 0.16, release: 0.65 },
-          filter: { Q: 1.2, type: 'lowpass', rolloff: -24 },
-          filterEnvelope: { attack: 0.025, decay: 0.22, sustain: 0.12, release: 0.5, baseFrequency: 110, octaves: 2.6 }
+          oscillator: { type: 'fatsquare', count: 2, spread: 15 },
+          envelope: { attack: 0.005, decay: 0.3, sustain: 0.1, release: 0.6 },
+          filter: { Q: 2.5, type: 'lowpass', rolloff: -24 },
+          filterEnvelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.5, baseFrequency: 60, octaves: 3.5 }
         });
       case 'am':
         return new Tone.AMSynth({
@@ -174,9 +178,10 @@ export class SoundEngine {
         });
       case 'synth':
       default:
+        // Classic Analog Lead
         return new Tone.Synth({
-          oscillator: { type: 'triangle' },
-          envelope: { attack: 0.025, decay: 0.2, sustain: 0.22, release: 1 }
+          oscillator: { type: 'fatsawtooth', count: 2, spread: 10 },
+          envelope: { attack: 0.05, decay: 0.2, sustain: 0.3, release: 1.2 }
         });
     }
   }
