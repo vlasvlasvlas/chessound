@@ -498,6 +498,15 @@ class ChesSoundApp {
       this.soundEngine.setAmbience(e.target.value);
     });
 
+    document.getElementById('vol-master')?.addEventListener('input', e => {
+      this.soundEngine.setMasterVolume(e.target.value);
+    });
+    
+    document.getElementById('mute-master')?.addEventListener('click', function() {
+      const muted = this.classList.toggle('muted');
+      app.soundEngine.setMasterMute(muted);
+    });
+
     LAYERS.forEach(layer => {
       document.getElementById(`vol-${layer}`)?.addEventListener('input', e => {
         this.soundEngine.setLayerVolume(layer, parseFloat(e.target.value));

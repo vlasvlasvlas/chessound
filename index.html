@@ -112,6 +112,11 @@
         <div class="panel collapsed">
           <h3>Mezcla</h3>
           <div class="layer-controls">
+            <div class="layer-row" style="margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);">
+              <span class="layer-label" style="font-weight: bold;">Master</span>
+              <input type="range" id="vol-master" min="0" max="100" value="80">
+              <button class="mute-btn" id="mute-master">M</button>
+            </div>
             <div class="layer-row"><span class="layer-label" title="Volumen principal de las notas generadas al mover las piezas.">Movimientos<span class="info-icon">?</span></span><input type="range" id="vol-moves" min="-40" max="0" value="0"><button class="mute-btn" id="mute-moves">M</button></div>
             <div class="layer-row"><span class="layer-label" title="Colchón de sonido de fondo. Aumenta su densidad según la tensión en el centro del tablero.">Ambiente<span class="info-icon">?</span></span><input type="range" id="vol-drone" min="-40" max="0" value="-20"><button class="mute-btn muted" id="mute-drone">M</button></div>
             <div class="layer-row"><span class="layer-label" title="Efectos sonoros extra que suenan durante capturas, jaques o mates.">Eventos<span class="info-icon">?</span></span><input type="range" id="vol-fx" min="-40" max="0" value="-6"><button class="mute-btn" id="mute-fx">M</button></div>

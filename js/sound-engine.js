@@ -207,8 +207,23 @@ export class SoundEngine {
     Tone.Transport.bpm.rampTo(clamp(Number(bpm), 30, 220), 0.08);
   }
 
-  setMasterVolume(db) {
-    if (this.masterBus) this.masterBus.volume.rampTo(Number(db), 0.08);
+  setMasterVolume(value) {
+    const val = clamp(Number(value), 0, 100);
+    if (this.masterBus) {
+      if (val === 0) {
+        this.masterBus.volume.rampTo(-Infinity, 0.1);
+      } else {
+        // Map 1-100 to -40dB -> +0dB
+        const db = -40 + (val / 100) * 40;
+        this.masterBus.volume.rampTo(db, 0.1);
+      }
+    }
+  }
+
+  setMasterMute(muted) {
+    if (this.masterBus) {
+      this.masterBus.mute = muted;
+    }
   }
 
   setIntensity(value) {
