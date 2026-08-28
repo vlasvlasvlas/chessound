@@ -214,3 +214,19 @@ body.visual-mode .board-piece--black { fill: #aaaaaa !important; filter: drop-sh
 .panel.collapsed > :not(h3) {
   display: none !important;
 }
+
+.seq-step {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #bfaea0;
+}
+
+.seq-step.seq-active {
+  color: #6a5a49 !important;
+}
+.seq-step.black.seq-active {
+  color: #4a331c !important;
+}
