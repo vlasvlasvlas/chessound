@@ -147,9 +147,9 @@ export class SoundEngine {
         // CS-80 style Brass / Pad
         return new Tone.PolySynth(Tone.MonoSynth, {
           oscillator: { type: 'fatsawtooth', count: 3, spread: 25 },
-          envelope: { attack: 0.15, decay: 0.3, sustain: 0.6, release: 1.8 },
+          envelope: { attack: 0.04, decay: 0.3, sustain: 0.6, release: 1.8 },
           filter: { Q: 1.2, type: 'lowpass', rolloff: -12 },
-          filterEnvelope: { attack: 0.15, decay: 0.4, sustain: 0.4, release: 1.5, baseFrequency: 300, octaves: 2.5 }
+          filterEnvelope: { attack: 0.05, decay: 0.4, sustain: 0.4, release: 1.5, baseFrequency: 300, octaves: 2.5 }
         });
       case 'mono':
         // Fat Moog style Bass
@@ -163,9 +163,9 @@ export class SoundEngine {
         return new Tone.AMSynth({
           harmonicity: 1.5,
           oscillator: { type: 'sine' },
-          envelope: { attack: 0.055, decay: 0.18, sustain: 0.3, release: 1.1 },
+          envelope: { attack: 0.015, decay: 0.18, sustain: 0.3, release: 1.1 },
           modulation: { type: 'triangle' },
-          modulationEnvelope: { attack: 0.09, decay: 0.18, sustain: 0.18, release: 0.9 }
+          modulationEnvelope: { attack: 0.025, decay: 0.18, sustain: 0.18, release: 0.9 }
         });
       case 'pluck':
         return new Tone.PluckSynth({ attackNoise: 0.65, dampening: 2900, resonance: 0.87, release: 1.1 });
@@ -181,7 +181,7 @@ export class SoundEngine {
         // Classic Analog Lead
         return new Tone.Synth({
           oscillator: { type: 'fatsawtooth', count: 2, spread: 10 },
-          envelope: { attack: 0.05, decay: 0.2, sustain: 0.3, release: 1.2 }
+          envelope: { attack: 0.015, decay: 0.2, sustain: 0.3, release: 1.2 }
         });
     }
   }
