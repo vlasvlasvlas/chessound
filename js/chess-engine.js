@@ -149,22 +149,99 @@ export class ChessEngine {
     return this._formatMoveInfo(move, this.currentMoveIndex);
   }
 
+  _evaluateBoard(chess) {
+    if (chess.in_checkmate()) return chess.turn() === 'w' ? -9999 : 9999;
+    if (chess.in_draw() || chess.in_stalemate() || chess.in_threefold_repetition()) return 0;
+    
+    let totalEvaluation = 0;
+    const board = chess.board();
+    const values = { p: 10, n: 30, b: 30, r: 50, q: 90, k: 900 };
+    const center = [
+      [0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0],
+      [0,0,1,1,1,1,0,0],
+      [0,0,1,2,2,1,0,0],
+      [0,0,1,2,2,1,0,0],
+      [0,0,1,1,1,1,0,0],
+      [0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0]
+    ];
+    
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        const piece = board[i][j];
+        if (piece) {
+          let val = (values[piece.type] || 0) + center[i][j];
+          totalEvaluation += (piece.color === 'w' ? val : -val);
+        }
+      }
+    }
+    return totalEvaluation;
+  }
+
+  _minimax(chess, depth, alpha, beta, isMaximizing) {
+    if (depth === 0 || chess.game_over()) {
+      return this._evaluateBoard(chess);
+    }
+    const moves = chess.moves();
+    if (isMaximizing) {
+      let maxEval = -Infinity;
+      for (let i = 0; i < moves.length; i++) {
+        chess.move(moves[i]);
+        maxEval = Math.max(maxEval, this._minimax(chess, depth - 1, alpha, beta, false));
+        chess.undo();
+        alpha = Math.max(alpha, maxEval);
+        if (beta <= alpha) break;
+      }
+      return maxEval;
+    } else {
+      let minEval = Infinity;
+      for (let i = 0; i < moves.length; i++) {
+        chess.move(moves[i]);
+        minEval = Math.min(minEval, this._minimax(chess, depth - 1, alpha, beta, true));
+        chess.undo();
+        beta = Math.min(beta, minEval);
+        if (beta <= alpha) break;
+      }
+      return minEval;
+    }
+  }
+
   generateBotMove() {
     if (this.chess.game_over()) return null;
     const moves = this.chess.moves({ verbose: true });
     if (moves.length === 0) return null;
-    
-    // Very simple bot: check/capture randomly, else random move
-    const aggressive = moves.filter(m => m.flags.includes('c') || m.san.includes('+') || m.san.includes('#'));
-    let selectedMove;
-    
-    if (aggressive.length > 0 && Math.random() > 0.4) {
-      selectedMove = aggressive[Math.floor(Math.random() * aggressive.length)];
-    } else {
-      selectedMove = moves[Math.floor(Math.random() * moves.length)];
+
+    let bestMove = null;
+    const isMaximizing = this.chess.turn() === 'w';
+    let bestValue = isMaximizing ? -Infinity : Infinity;
+
+    // Shuffle moves to ensure varied games (not the exact same game every time)
+    moves.sort(() => Math.random() - 0.5);
+
+    // Depth 2 search (root loop + 1 depth in minimax)
+    for (let i = 0; i < moves.length; i++) {
+      const move = moves[i];
+      this.chess.move(move.san);
+      const boardValue = this._minimax(this.chess, 1, -Infinity, Infinity, !isMaximizing);
+      this.chess.undo();
+
+      if (isMaximizing) {
+        if (boardValue > bestValue) {
+          bestValue = boardValue;
+          bestMove = move;
+        }
+      } else {
+        if (boardValue < bestValue) {
+          bestValue = boardValue;
+          bestMove = move;
+        }
+      }
     }
+
+    if (!bestMove) bestMove = moves[0];
     
-    const moveResult = this.chess.move(selectedMove.san);
+    const moveResult = this.chess.move(bestMove.san);
     this.moves = this.moves.slice(0, this.currentMoveIndex);
     this.moves.push(moveResult);
     this.currentMoveIndex++;
