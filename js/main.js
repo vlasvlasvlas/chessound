@@ -431,6 +431,13 @@ class ChesSoundApp {
       if (e.target === infoModal) infoModal.classList.add('hidden');
     });
 
+    // Acordeones para los paneles laterales
+    document.querySelectorAll('.panel h3').forEach(header => {
+      header.addEventListener('click', () => {
+        header.parentElement.classList.toggle('collapsed');
+      });
+    });
+
     document.getElementById('game-selector')?.addEventListener('change', e => this.loadGame(e.target.value));
     
     document.getElementById('game-mode')?.addEventListener('change', e => {
