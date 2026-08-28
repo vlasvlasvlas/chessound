@@ -85,10 +85,12 @@ export class SoundEngine {
     this.droneFilter = new Tone.Filter({ frequency: 480, type: 'lowpass', rolloff: -24, Q: 0.6 }).connect(this.droneBus);
     this.captureFilter = new Tone.Filter({ frequency: 1250, type: 'bandpass', rolloff: -12, Q: 0.75 }).connect(this.fxBus);
 
-    this.captureNoise = new Tone.NoiseSynth({
-      noise: { type: 'pink' },
-      envelope: { attack: 0.002, decay: 0.075, sustain: 0, release: 0.06 }
-    }).connect(this.captureFilter);
+    this.captureNoise = new Tone.MembraneSynth({
+      pitchDecay: 0.06,
+      octaves: 5,
+      oscillator: { type: 'sine' },
+      envelope: { attack: 0.001, decay: 0.25, sustain: 0, release: 0.1 }
+    }).connect(this.fxBus);
 
     this.checkSynth = new Tone.FMSynth({
       harmonicity: 2,
@@ -279,7 +281,7 @@ export class SoundEngine {
       }
 
       if (captured) {
-        this.captureNoise.triggerAttackRelease('32n', time + 0.025, clamp(velocity * 0.58, 0.08, 0.48));
+        this.captureNoise.triggerAttackRelease('C1', '8n', time, clamp(velocity * 1.5, 0.4, 0.9));
       }
 
       if (isCheck || isPromotion) {
