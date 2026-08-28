@@ -150,9 +150,6 @@ export class ChessEngine {
   }
 
   _evaluateBoard(chess) {
-    if (chess.in_checkmate()) return chess.turn() === 'w' ? -9999 : 9999;
-    if (chess.in_draw() || chess.in_stalemate() || chess.in_threefold_repetition()) return 0;
-    
     let totalEvaluation = 0;
     const board = chess.board();
     const values = { p: 10, n: 30, b: 30, r: 50, q: 90, k: 900 };
@@ -180,10 +177,18 @@ export class ChessEngine {
   }
 
   _minimax(chess, depth, alpha, beta, isMaximizing) {
-    if (depth === 0 || chess.game_over()) {
+    if (depth === 0) {
       return this._evaluateBoard(chess);
     }
+    
     const moves = chess.moves();
+    
+    // Quick game over check without heavy methods
+    if (moves.length === 0) {
+      if (chess.in_check()) return isMaximizing ? -9999 : 9999;
+      return 0; // Draw/Stalemate
+    }
+
     if (isMaximizing) {
       let maxEval = -Infinity;
       for (let i = 0; i < moves.length; i++) {
