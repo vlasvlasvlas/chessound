@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChesSound — El Sonido del Ajedrez</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="start-overlay">
+    <div class="overlay-content">
+      <h1>ChesSound</h1>
+      <p class="overlay-desc">Partidas de ajedrez como sonido.</p>
+      <button id="btn-start">Comenzar</button>
+    </div>
+  </div>
+
+  <div id="app-container" class="hidden">
+    <header>
+      <div class="logo">ChesSound</div>
+      <div class="header-controls">
+        <div class="control-group game-mode-control">
+          <label for="game-mode">Modo</label>
+          <select id="game-mode">
+            <option value="pgn">Históricas (PGN)</option>
+            <option value="cvc">PC vs PC (Infinita)</option>
+            <option value="hvc">Humano vs PC</option>
+            <option value="hvh">Humano vs Humano</option>
+          </select>
+        </div>
+        <div class="control-group view-mode-control">
+          <label for="view-mode">Vista</label>
+          <select id="view-mode">
+            <option value="classic">Clásica</option>
+            <option value="visual">Proyección Visual</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="scale-selector">Escala</label>
+          <select id="scale-selector">
+            <option value="major">Mayor</option>
+            <option value="minor">Menor</option>
+            <option value="dorian">Dórico</option>
+            <option value="phrygian">Frigio</option>
+            <option value="pentatonic_major">Pentatónica Mayor</option>
+            <option value="pentatonic_minor" selected>Pentatónica Menor</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="root-selector">Tónica</label>
+          <select id="root-selector">
+            <option value="C">C</option><option value="C#">C#</option>
+            <option value="D">D</option><option value="D#">D#</option>
+            <option value="E">E</option>
+            <option value="F">F</option><option value="F#">F#</option>
+            <option value="G">G</option><option value="G#">G#</option>
+            <option value="A">A</option><option value="A#">A#</option>
+            <option value="B">B</option>
+          </select>
+        </div>
+        <div class="control-group bpm-control">
+          <label for="bpm-slider">Tempo</label>
+          <input type="range" id="bpm-slider" min="20" max="500" value="120">
+          <span id="bpm-value">120</span>
+        </div>
+        <button id="btn-info" class="icon-btn" title="Acerca de ChesSound">?</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="board-section">
+        <div id="board-container"></div>
+        <div id="game-info"></div>
+      </section>
+
+      <aside id="controls-section">
+        <div class="panel">
+          <h3>Importar partida</h3>
+          <textarea id="pgn-input" rows="4" placeholder="Pegá la notación PGN acá, ej:&#10;1. e4 e5 2. Nf3 Nc6 3. Bb5 a6..."></textarea>
+          <button id="btn-load-pgn" class="load-btn">Escuchar esta partida</button>
+        </div>
+
+        <div class="panel">
+          <h3>Clásicas</h3>
+          <select id="game-selector"></select>
+          <div class="playback-mode-row">
+            <label for="playback-mode">Al terminar:</label>
+            <select id="playback-mode">
+              <option value="playlist">Siguiente</option>
+              <option value="loop">Repetir</option>
+              <option value="stop">Detener</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Instrumentos</h3>
+          <div class="piece-controls">
+            <div class="piece-row"><span class="piece-icon">♔</span><span class="piece-label">Rey</span><select class="synth-selector" id="synth-piece-k"><option value="fm" selected>Metálico</option><option value="poly">Acordes</option><option value="mono">Bajo</option><option value="am">Flauta</option><option value="pluck">Cuerda</option><option value="membrane">Percusión</option><option value="synth">Clásico</option></select><input type="range" id="vol-piece-k" min="-40" max="0" value="0"><button class="mute-btn" id="mute-piece-k">M</button></div>
+            <div class="piece-row"><span class="piece-icon">♕</span><span class="piece-label">Dama</span><select class="synth-selector" id="synth-piece-q"><option value="fm">Metálico</option><option value="poly" selected>Acordes</option><option value="mono">Bajo</option><option value="am">Flauta</option><option value="pluck">Cuerda</option><option value="membrane">Percusión</option><option value="synth">Clásico</option></select><input type="range" id="vol-piece-q" min="-40" max="0" value="0"><button class="mute-btn" id="mute-piece-q">M</button></div>
+            <div class="piece-row"><span class="piece-icon">♖</span><span class="piece-label">Torre</span><select class="synth-selector" id="synth-piece-r"><option value="fm">Metálico</option><option value="poly">Acordes</option><option value="mono" selected>Bajo</option><option value="am">Flauta</option><option value="pluck">Cuerda</option><option value="membrane">Percusión</option><option value="synth">Clásico</option></select><input type="range" id="vol-piece-r" min="-40" max="0" value="0"><button class="mute-btn" id="mute-piece-r">M</button></div>
+            <div class="piece-row"><span class="piece-icon">♗</span><span class="piece-label">Alfil</span><select class="synth-selector" id="synth-piece-b"><option value="fm">Metálico</option><option value="poly">Acordes</option><option value="mono">Bajo</option><option value="am" selected>Flauta</option><option value="pluck">Cuerda</option><option value="membrane">Percusión</option><option value="synth">Clásico</option></select><input type="range" id="vol-piece-b" min="-40" max="0" value="0"><button class="mute-btn" id="mute-piece-b">M</button></div>
+            <div class="piece-row"><span class="piece-icon">♘</span><span class="piece-label">Caballo</span><select class="synth-selector" id="synth-piece-n"><option value="fm">Metálico</option><option value="poly">Acordes</option><option value="mono">Bajo</option><option value="am">Flauta</option><option value="pluck" selected>Cuerda</option><option value="membrane">Percusión</option><option value="synth">Clásico</option></select><input type="range" id="vol-piece-n" min="-40" max="0" value="0"><button class="mute-btn" id="mute-piece-n">M</button></div>
+            <div class="piece-row"><span class="piece-icon">♙</span><span class="piece-label">Peón</span><select class="synth-selector" id="synth-piece-p"><option value="fm">Metálico</option><option value="poly">Acordes</option><option value="mono">Bajo</option><option value="am">Flauta</option><option value="pluck">Cuerda</option><option value="membrane" selected>Percusión</option><option value="synth">Clásico</option></select><input type="range" id="vol-piece-p" min="-40" max="0" value="0"><button class="mute-btn" id="mute-piece-p">M</button></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Mezcla</h3>
+          <div class="layer-controls">
+            <div class="layer-row"><span class="layer-label" title="Volumen principal de las notas generadas al mover las piezas.">Movimientos<span class="info-icon">?</span></span><input type="range" id="vol-moves" min="-40" max="0" value="0"><button class="mute-btn" id="mute-moves">M</button></div>
+            <div class="layer-row"><span class="layer-label" title="Colchón de sonido de fondo. Aumenta su densidad según la tensión en el centro del tablero.">Ambiente<span class="info-icon">?</span></span><input type="range" id="vol-drone" min="-40" max="0" value="-20"><button class="mute-btn" id="mute-drone">M</button></div>
+            <div class="layer-row"><span class="layer-label" title="Efectos sonoros extra que suenan durante capturas, jaques o mates.">Eventos<span class="info-icon">?</span></span><input type="range" id="vol-fx" min="-40" max="0" value="-6"><button class="mute-btn" id="mute-fx">M</button></div>
+            <div class="layer-row"><span class="layer-label" title="Secuenciador rítmico (abajo). La posición de los peones en las columnas define el ritmo.">Peones<span class="info-icon">?</span></span><input type="range" id="vol-pawnseq" min="-40" max="0" value="-12"><button class="mute-btn" id="mute-pawnseq">M</button></div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      <div class="transport">
+        <div class="transport-buttons">
+          <button id="btn-step-backward" title="Anterior">⏮</button>
+          <button id="btn-stop" title="Detener">⏹</button>
+          <button id="btn-play" title="Reproducir">▶</button>
+          <button id="btn-step-forward" title="Siguiente">⏭</button>
+        </div>
+        <div class="transport-progress">
+          <input type="range" id="progress-bar" min="0" max="100" value="0">
+          <span id="move-counter">0 / 0</span>
+        </div>
+      </div>
+
+      <div id="pawn-sequencer">
+        <div class="seq-row">
+          <span class="seq-label">W</span>
+          <div id="seq-w-0" class="seq-step white"></div><div id="seq-w-1" class="seq-step white"></div><div id="seq-w-2" class="seq-step white"></div><div id="seq-w-3" class="seq-step white"></div>
+          <div id="seq-w-4" class="seq-step white"></div><div id="seq-w-5" class="seq-step white"></div><div id="seq-w-6" class="seq-step white"></div><div id="seq-w-7" class="seq-step white"></div>
+        </div>
+        <div class="seq-row">
+          <span class="seq-label">B</span>
+          <div id="seq-b-0" class="seq-step black"></div><div id="seq-b-1" class="seq-step black"></div><div id="seq-b-2" class="seq-step black"></div><div id="seq-b-3" class="seq-step black"></div>
+          <div id="seq-b-4" class="seq-step black"></div><div id="seq-b-5" class="seq-step black"></div><div id="seq-b-6" class="seq-step black"></div><div id="seq-b-7" class="seq-step black"></div>
+        </div>
+      </div>
+
+      <div id="move-list"></div>
+    </footer>
+  </div>
+
+  <div id="info-modal" class="modal hidden">
+    <div class="modal-content">
+      <button id="btn-close-modal" class="close-btn">&times;</button>
+      <h2>Sobre ChesSound</h2>
+      <p>ChesSound es una experiencia interactiva que transforma partidas de ajedrez en música. La idea es poder escuchar las "canciones" ocultas dentro de los movimientos del tablero.</p>
+      <p>Las casillas definen las notas, cada tipo de pieza funciona como un sintetizador distinto, y los peones actúan como un secuenciador rítmico. Podés reproducir partidas clásicas o pegar tu propio PGN para escuchar cómo suena tu juego.</p>
+      <a href="https://github.com/vlasvlasvlas/chessound" target="_blank" class="repo-link">github.com/vlasvlasvlas/chessound</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
