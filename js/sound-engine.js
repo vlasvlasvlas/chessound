@@ -75,12 +75,16 @@ export class SoundEngine {
 
     this.limiter = new Tone.Limiter(-1).toDestination();
     this.masterBus = new Tone.Channel({ volume: -3 }).connect(this.limiter);
-    this.reverb = new Tone.Reverb({ decay: 3.4, preDelay: 0.018, wet: 0.34 }).connect(this.masterBus);
+    
+    // Configuración de Reverb en Paralelo (Envío / Send) de alta calidad
+    this.reverb = new Tone.Reverb({ decay: 5.5, preDelay: 0.02, wet: 1 }).connect(this.masterBus);
+    this.reverbSend = new Tone.Volume(-15).connect(this.reverb);
 
-    this.movesBus = new Tone.Channel({ volume: -5 }).connect(this.reverb);
-    this.droneBus = new Tone.Channel({ volume: -22 }).connect(this.reverb);
-    this.fxBus = new Tone.Channel({ volume: -10 }).connect(this.reverb);
-    this.pawnBus = new Tone.Channel({ volume: -18 }).connect(this.reverb);
+    // Los buses van directo al Master (señal limpia) y también al Envío de Reverb
+    this.movesBus = new Tone.Channel({ volume: -5 }).connect(this.masterBus).connect(this.reverbSend);
+    this.droneBus = new Tone.Channel({ volume: -22 }).connect(this.masterBus).connect(this.reverbSend);
+    this.fxBus = new Tone.Channel({ volume: -10 }).connect(this.masterBus).connect(this.reverbSend);
+    this.pawnBus = new Tone.Channel({ volume: -18 }).connect(this.masterBus).connect(this.reverbSend);
 
     this.droneFilter = new Tone.Filter({ frequency: 480, type: 'lowpass', rolloff: -24, Q: 0.6 }).connect(this.droneBus);
     this.captureFilter = new Tone.Filter({ frequency: 1250, type: 'bandpass', rolloff: -12, Q: 0.75 }).connect(this.fxBus);
@@ -207,8 +211,16 @@ export class SoundEngine {
   }
 
   setAmbience(value) {
-    const normalized = clamp(Number(value) > 1 ? Number(value) / 100 : Number(value));
-    if (this.reverb) this.reverb.wet.rampTo(normalized * 0.72, 0.12);
+    const val = clamp(Number(value), 0, 100);
+    if (this.reverbSend) {
+      if (val === 0) {
+        this.reverbSend.volume.rampTo(-Infinity, 0.1);
+      } else {
+        // Map 1-100 to -40dB to +6dB roughly for the send effect
+        const db = -40 + (val / 100) * 46;
+        this.reverbSend.volume.rampTo(db, 0.1);
+      }
+    }
   }
 
   setDroneAmount(value) {

@@ -181,3 +181,10 @@ body.visual-mode .highlight-check { fill: rgba(255, 50, 50, 0.9) !important; }
 /* Fichas con brillo/neon */
 body.visual-mode .board-piece--white { fill: #ffffff !important; filter: drop-shadow(0 0 4px rgba(255,255,255,0.8)); }
 body.visual-mode .board-piece--black { fill: #aaaaaa !important; filter: drop-shadow(0 0 4px rgba(255,255,255,0.3)); }
+
+/* Fix for layer-label wrapping */
+.layer-label {
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  width: 120px !important;
+}
