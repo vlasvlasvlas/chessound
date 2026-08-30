@@ -7,7 +7,8 @@ La interfaz conecta en tiempo real tablero, movimiento SAN, voz activa, partitur
 ## Modelo musical
 
 - **Archivos `a–h`:** grados del modo elegido.
-- **Filas `1–4` / `5–8`:** dos zonas de registro controladas.
+- **Filas `1–4` / `5–8`:** dos zonas de registro; la segunda repite la escala una octava arriba.
+- **Filas `1–8`:** abren progresivamente un filtro pasa-bajos con una resonancia sutil, de oscuro/grave a brillante/agudo.
 - **Rey:** campana FM con gesto de origen y destino.
 - **Dama:** acordes diatónicos.
 - **Torre:** fundamento monofónico grave.
@@ -22,7 +23,7 @@ El centro armónico responde a ocupación central, pérdida de material y fase d
 
 ## Secuenciador de peones
 
-Los peones forman una grilla entrelazada de dieciséis pasos. El archivo define el paso, la fila define la altura dentro de la escala y el avance modifica su intensidad. Densidad y swing son configurables.
+Los peones forman una grilla entrelazada de dieciséis pasos. El archivo define el paso, la fila define la zona de registro y la apertura del filtro, y el avance modifica su intensidad. Densidad y swing son configurables.
 
 ## Escenas
 

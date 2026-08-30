@@ -14,6 +14,8 @@ export class PawnSequencer {
     this.initialized = false;
     this.isScheduled = false;
     this.channel = null;
+    this.whiteFilter = null;
+    this.blackFilter = null;
     this.whiteSynth = null;
     this.blackSynth = null;
     this.sequence = null;
@@ -25,16 +27,18 @@ export class PawnSequencer {
     if (!destination) throw new Error('La ruta de audio de peones no está disponible.');
 
     this.channel = new Tone.Channel({ volume: 0 }).connect(destination);
+    this.whiteFilter = new Tone.Filter({ frequency: 900, type: 'lowpass', rolloff: -12, Q: 0.65 }).connect(this.channel);
+    this.blackFilter = new Tone.Filter({ frequency: 900, type: 'lowpass', rolloff: -12, Q: 0.65 }).connect(this.channel);
     this.whiteSynth = new Tone.Synth({
       oscillator: { type: 'triangle8' },
       envelope: { attack: 0.002, decay: 0.065, sustain: 0, release: 0.07 }
-    }).connect(this.channel);
+    }).connect(this.whiteFilter);
     this.blackSynth = new Tone.MembraneSynth({
       pitchDecay: 0.025,
       octaves: 1.2,
       oscillator: { type: 'sine' },
       envelope: { attack: 0.002, decay: 0.09, sustain: 0, release: 0.06 }
-    }).connect(this.channel);
+    }).connect(this.blackFilter);
 
     const events = [];
     for (let index = 0; index < 8; index += 1) {
@@ -87,6 +91,8 @@ export class PawnSequencer {
       const accent = index % 4 === 0 ? 0.08 : 0;
       const velocity = Math.min(0.5, 0.14 + advancement * 0.2 + accent);
       const note = this.soundEngine.squareToNote(stepData.square, 'p', isWhite ? 0 : -1);
+      const filter = isWhite ? this.whiteFilter : this.blackFilter;
+      this.soundEngine.applyRankFilter(filter, stepData.square, time);
       synth.triggerAttackRelease(note, '32n', time, velocity);
     }
 
@@ -135,10 +141,13 @@ export class PawnSequencer {
 
   dispose() {
     this.stop();
-    [this.sequence, this.whiteSynth, this.blackSynth, this.channel].forEach(node => node?.dispose());
+    [this.sequence, this.whiteSynth, this.blackSynth, this.whiteFilter, this.blackFilter, this.channel]
+      .forEach(node => node?.dispose());
     this.sequence = null;
     this.whiteSynth = null;
     this.blackSynth = null;
+    this.whiteFilter = null;
+    this.blackFilter = null;
     this.channel = null;
     this.initialized = false;
   }

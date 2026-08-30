@@ -32,6 +32,14 @@ const DEFAULT_SYNTHS = {
   p: 'membrane'
 };
 
+const RANK_FILTER = {
+  minFrequency: 900,
+  maxFrequency: 5500,
+  minResonance: 0.65,
+  maxResonance: 1.6,
+  rampTime: 0.045
+};
+
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
 export class SoundEngine {
@@ -60,6 +68,7 @@ export class SoundEngine {
     this.pieceSynths = {};
     this.pieceSynthNames = {};
     this.pieceChannels = {};
+    this.pieceFilters = {};
     this.currentDroneNotes = [];
     this.lastBoardState = [];
     this.lastTension = 0.18;
@@ -117,6 +126,12 @@ export class SoundEngine {
 
     for (const piece of Object.keys(DEFAULT_SYNTHS)) {
       this.pieceChannels[piece] = new Tone.Channel().connect(this.movesBus);
+      this.pieceFilters[piece] = new Tone.Filter({
+        frequency: RANK_FILTER.minFrequency,
+        type: 'lowpass',
+        rolloff: -12,
+        Q: RANK_FILTER.minResonance
+      }).connect(this.pieceChannels[piece]);
     }
 
     this.isInitialized = true;
@@ -207,7 +222,7 @@ export class SoundEngine {
     if (!this.isInitialized || !this.pieceChannels[pieceType]) return;
     if (this.pieceSynthNames[pieceType] === synthName && this.pieceSynths[pieceType]) return;
 
-    const nextSynth = this._createSynthInstance(synthName).connect(this.pieceChannels[pieceType]);
+    const nextSynth = this._createSynthInstance(synthName).connect(this.pieceFilters[pieceType]);
     this.pieceSynths[pieceType]?.dispose();
     this.pieceSynths[pieceType] = nextSynth;
     this.pieceSynthNames[pieceType] = synthName;
@@ -281,6 +296,34 @@ export class SoundEngine {
     return this._degreeToNote(fileIndex, profile.octave + rankShift + transposeOctaves);
   }
 
+  getRankFilterSettings(squareOrRank) {
+    const parsedRank = typeof squareOrRank === 'string'
+      ? Number(squareOrRank.charAt(1))
+      : Number(squareOrRank);
+    const rank = clamp(Number.isFinite(parsedRank) ? parsedRank : 1, 1, 8);
+    const position = (rank - 1) / 7;
+    const frequencyRange = RANK_FILTER.maxFrequency / RANK_FILTER.minFrequency;
+
+    return {
+      rank,
+      cutoff: Math.round(RANK_FILTER.minFrequency * Math.pow(frequencyRange, position)),
+      resonance: RANK_FILTER.minResonance
+        + ((RANK_FILTER.maxResonance - RANK_FILTER.minResonance) * position)
+    };
+  }
+
+  applyRankFilter(filter, squareOrRank, time = Tone.now()) {
+    if (!filter) return this.getRankFilterSettings(squareOrRank);
+    const settings = this.getRankFilterSettings(squareOrRank);
+    filter.frequency.rampTo(settings.cutoff, RANK_FILTER.rampTime, time);
+    filter.Q.rampTo(settings.resonance, RANK_FILTER.rampTime, time);
+    return settings;
+  }
+
+  _applyPieceRankFilter(pieceType, square, time) {
+    return this.applyRankFilter(this.pieceFilters[pieceType], square, time);
+  }
+
   _squareChord(square) {
     const fileIndex = square.charCodeAt(0) - 97;
     const rankShift = Number(square.charAt(1)) >= 5 ? 1 : 0;
@@ -307,25 +350,33 @@ export class SoundEngine {
     const velocity = clamp(profile.velocity * this.intensity * phaseShape * eventWeight, 0.08, 0.92);
     const destinationNote = this.squareToNote(to, piece);
     const originNote = this.squareToNote(from, piece);
+    const destinationFilter = this.getRankFilterSettings(to);
 
     this.pieceChannels[piece].pan.rampTo(((to.charCodeAt(0) - 97) / 7 - 0.5) * 0.62 + (color === 'w' ? -0.05 : 0.05), 0.04);
 
     try {
       if (piece === 'q' && this.pieceSynthNames.q === 'poly') {
+        this._applyPieceRankFilter(piece, to, time);
         this._trigger(synth, this._squareChord(to), profile.duration, time, velocity * 0.8);
       } else if (piece === 'n' || piece === 'b') {
+        this._applyPieceRankFilter(piece, from, time);
+        this._applyPieceRankFilter(piece, to, time + 0.065);
         this._trigger(synth, originNote, '32n', time, velocity * 0.48);
         this._trigger(synth, destinationNote, profile.duration, time + 0.065, velocity);
       } else if (piece === 'k') {
+        this._applyPieceRankFilter(piece, from, time);
+        this._applyPieceRankFilter(piece, to, time + 0.085);
         this._trigger(synth, originNote, '16n', time, velocity * 0.5);
         this._trigger(synth, destinationNote, profile.duration, time + 0.085, velocity);
       } else {
+        this._applyPieceRankFilter(piece, to, time);
         this._trigger(synth, destinationNote, profile.duration, time, velocity);
       }
 
       if (isCastling) {
         const rank = to.charAt(1);
         const rookDestination = `${to.charAt(0) === 'g' ? 'f' : 'd'}${rank}`;
+        this._applyPieceRankFilter('r', rookDestination, time + 0.13);
         this._trigger(this.pieceSynths.r, this.squareToNote(rookDestination, 'r'), '4n', time + 0.13, velocity * 0.75);
       }
 
@@ -350,7 +401,11 @@ export class SoundEngine {
     return {
       note: destinationNote,
       notes: piece === 'q' && this.pieceSynthNames.q === 'poly' ? this._squareChord(to) : [destinationNote],
-      velocity: Math.round(velocity * 100)
+      velocity: Math.round(velocity * 100),
+      filter: {
+        cutoff: destinationFilter.cutoff,
+        resonance: Number(destinationFilter.resonance.toFixed(2))
+      }
     };
   }
 
@@ -433,7 +488,8 @@ export class SoundEngine {
     this.releaseDrone();
     [this.droneSynth, this.captureNoise, this.checkSynth, this.finalSynth,
       this.droneFilter, this.captureFilter, this.reverb,
-      ...Object.values(this.pieceSynths), ...Object.values(this.pieceChannels),
+      ...Object.values(this.pieceSynths), ...Object.values(this.pieceFilters),
+      ...Object.values(this.pieceChannels),
       this.movesBus, this.droneBus, this.fxBus, this.pawnBus,
       this.masterBus, this.limiter].forEach(node => node?.dispose());
     this.isInitialized = false;

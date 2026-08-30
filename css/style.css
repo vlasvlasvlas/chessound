@@ -14,15 +14,8 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body { font-family: var(--font-sans); background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
-.hidden { display: none !important; }
 
 /* OVERLAY */
-#start-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; justify-content: center; align-items: center; }
-.overlay-content { text-align: center; max-width: 500px; padding: 2rem; }
-.overlay-content h1 { font-family: var(--font-serif); font-size: 4rem; font-weight: 400; margin-bottom: 1rem; }
-.overlay-desc { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 3rem; line-height: 1.6; }
-#btn-start { background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 1rem 3rem; font-size: 1.1rem; font-family: var(--font-sans); cursor: pointer; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: all 0.2s; }
-#btn-start:hover { background: var(--bg); border-color: var(--text-muted); box-shadow: 0 6px 12px rgba(0,0,0,0.08); }
 
 /* LAYOUT */
 #app-container { display: grid; grid-template-rows: 56px 1fr auto; height: 100vh; }
