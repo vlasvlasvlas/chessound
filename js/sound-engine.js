@@ -24,11 +24,11 @@ const PIECE_PROFILES = {
 };
 
 const DEFAULT_SYNTHS = {
-  k: 'fm',
-  q: 'poly',
-  r: 'mono',
-  b: 'am',
-  n: 'pluck',
+  k: 'poly-analog',
+  q: 'pluck',
+  r: 'mono-analog',
+  b: 'synth-analog',
+  n: 'synth',
   p: 'membrane'
 };
 
