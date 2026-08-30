@@ -233,3 +233,17 @@ body.visual-mode .board-piece--black { fill: #aaaaaa !important; filter: drop-sh
 .overlay-content h1 { font-size: 3rem; color: var(--text); letter-spacing: 0.1em; margin: 0; transition: color 0.2s; }
 .overlay-content h1:hover { color: var(--accent); }
 .hidden { display: none !important; }
+
+.start-hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 1.5rem;
+  letter-spacing: 0.05em;
+  animation: pulse 2.5s infinite;
+  text-transform: uppercase;
+}
+@keyframes pulse {
+  0% { opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; }
+}

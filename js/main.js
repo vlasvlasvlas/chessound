@@ -541,10 +541,19 @@ class ChesSoundApp {
 
 const app = new ChesSoundApp();
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('start-overlay')?.addEventListener('click', async () => {
+  const overlay = document.getElementById('start-overlay');
+  if (!overlay) return;
+
+  let started = false;
+  const startApp = async () => {
+    if (started) return;
+    started = true;
     if (Tone.context.state !== 'running') {
       await Tone.start();
     }
     app.init();
-  }, { once: true });
+  };
+
+  overlay.addEventListener('click', startApp, { once: true });
+  document.addEventListener('keydown', startApp, { once: true });
 });
