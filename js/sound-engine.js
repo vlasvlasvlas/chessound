@@ -80,8 +80,6 @@ export class SoundEngine {
     }
     if (this.isInitialized) return;
 
-    await Tone.start();
-
     this.limiter = new Tone.Limiter(-1).toDestination();
     this.masterBus = new Tone.Channel({ volume: -3 }).connect(this.limiter);
     
