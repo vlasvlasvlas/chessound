@@ -234,7 +234,7 @@ export class SoundEngine {
 
   setBPM(bpm) {
     if (!Number.isFinite(Number(bpm)) || typeof Tone === 'undefined') return;
-    Tone.Transport.bpm.rampTo(clamp(Number(bpm), 30, 220), 0.08);
+    Tone.Transport.bpm.rampTo(clamp(Number(bpm), 30, 1000), 0.08);
   }
 
   setMasterVolume(value) {

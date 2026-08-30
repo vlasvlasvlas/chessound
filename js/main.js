@@ -17,7 +17,7 @@ class ChesSoundApp {
     this.isPlaying = false;
     this.isEnding = false;
     this.currentGame = null;
-    this.bpm = 120;
+    this.bpm = 700;
     this.scale = 'pentatonic_minor';
     this.root = 'C';
     this.playbackMode = 'playlist';
