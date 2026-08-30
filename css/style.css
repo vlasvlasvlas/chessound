@@ -223,3 +223,13 @@ body.visual-mode .board-piece--black { fill: #aaaaaa !important; filter: drop-sh
 .seq-step.black.seq-active {
   color: #4a331c !important;
 }
+
+#start-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: var(--bg); display: flex; align-items: center; justify-content: center;
+  z-index: 9999;
+}
+.overlay-content { text-align: center; }
+.overlay-content h1 { font-size: 3rem; color: var(--text); letter-spacing: 0.1em; margin: 0; transition: color 0.2s; }
+.overlay-content h1:hover { color: var(--accent); }
+.hidden { display: none !important; }

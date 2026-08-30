@@ -95,6 +95,8 @@ class ChesSoundApp {
       this._createPlaybackLoop();
       this.loadGame(CLASSIC_GAMES[0].id);
 
+      document.getElementById('start-overlay').style.display = 'none';
+      document.getElementById('app-container').classList.remove('hidden');
       console.log('[ChesSound] Listo!');
     } catch (err) {
       console.error('[ChesSound] Error:', err);
@@ -539,12 +541,10 @@ class ChesSoundApp {
 
 const app = new ChesSoundApp();
 document.addEventListener('DOMContentLoaded', () => {
-  app.init();
-  
-  // Ensure audio context starts on first user interaction
-  document.body.addEventListener('click', async () => {
+  document.getElementById('start-overlay')?.addEventListener('click', async () => {
     if (Tone.context.state !== 'running') {
       await Tone.start();
     }
+    app.init();
   }, { once: true });
 });
